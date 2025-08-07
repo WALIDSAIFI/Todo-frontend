@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import axios from 'axios'
+import api from '@/services/api'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -11,42 +11,50 @@ export const useAuthStore = defineStore('auth', () => {
   // Actions
   const login = async (credentials) => {
     try {
-      const response = await axios.post('/api/auth/login', credentials)
+      const response = await api.post('/api/auth/login', credentials)
       const { token: authToken, user: userData } = response.data
       
       token.value = authToken
       user.value = userData
       localStorage.setItem('token', authToken)
       
-      // Set default authorization header
-      axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
-      
       return { success: true }
     } catch (error) {
+      console.error('Login error:', error)
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Login failed' 
+        message: error.response?.data?.message || 'Login failed. Please check your credentials.' 
       }
     }
   }
 
   const register = async (userData) => {
     try {
-      const response = await axios.post('/api/auth/register', userData)
+      const response = await api.post('/api/auth/register', userData)
       const { token: authToken, user: newUser } = response.data
       
       token.value = authToken
       user.value = newUser
       localStorage.setItem('token', authToken)
       
-      // Set default authorization header
-      axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`
-      
       return { success: true }
     } catch (error) {
+      console.error('Registration error:', error)
+      let errorMessage = 'Registration failed. Please try again.'
+      
+      if (error.response?.data?.errors) {
+        // Handle Laravel validation errors
+        const errors = error.response.data.errors
+        errorMessage = Object.values(errors).flat().join(', ')
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error.code === 'NETWORK_ERROR') {
+        errorMessage = 'Network error. Please check your connection and try again.'
+      }
+      
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Registration failed' 
+        message: errorMessage
       }
     }
   }
@@ -55,25 +63,19 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = null
     user.value = null
     localStorage.removeItem('token')
-    delete axios.defaults.headers.common['Authorization']
   }
 
   const checkAuth = async () => {
     if (!token.value) return false
     
     try {
-      const response = await axios.get('/api/auth/me')
+      const response = await api.get('/api/auth/me')
       user.value = response.data
       return true
     } catch (error) {
       logout()
       return false
     }
-  }
-
-  // Initialize auth state
-  if (token.value) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
   }
 
   return {

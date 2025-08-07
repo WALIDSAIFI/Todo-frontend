@@ -4,7 +4,9 @@ import { ref, computed } from 'vue'
 export const useNotificationsStore = defineStore('notifications', () => {
   // State
   const notifications = ref([])
-  const unreadCount = computed(() => notifications.value.filter(n => !n.read).length)
+  const unreadCount = computed(() => {
+    return notifications.value?.filter(n => !n.read)?.length || 0
+  })
 
   // Actions
   const addNotification = (notification) => {

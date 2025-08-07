@@ -9,9 +9,17 @@ export const useTasksStore = defineStore('tasks', () => {
   const error = ref(null)
 
   // Computed
-  const completedTasks = computed(() => tasks.value.filter(task => task.completed))
-  const pendingTasks = computed(() => tasks.value.filter(task => !task.completed))
-  const tasksCount = computed(() => tasks.value.length)
+  const completedTasks = computed(() => {
+    return tasks.value?.filter(task => task.completed) || []
+  })
+  
+  const pendingTasks = computed(() => {
+    return tasks.value?.filter(task => !task.completed) || []
+  })
+  
+  const tasksCount = computed(() => {
+    return tasks.value?.length || 0
+  })
 
   // Actions
   const fetchTasks = async () => {

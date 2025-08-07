@@ -10,7 +10,9 @@ import NotificationsPage from '@/pages/NotificationsPage.vue'
 const routes = [
   {
     path: '/',
-    redirect: '/dashboard'
+    name: 'Home',
+    component: () => import('@/pages/HomePage.vue'),
+    meta: { requiresAuth: false }
   },
   {
     path: '/login',

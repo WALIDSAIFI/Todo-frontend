@@ -4,6 +4,7 @@ import router from './router'
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import './assets/main.css'
+import { useAuthStore } from './stores/auth'
 
 import App from './App.vue'
 
@@ -30,6 +31,14 @@ app.use(Toast, {
   closeButton: 'button',
   icon: true,
   rtl: false
+})
+
+// Check authentication on app start
+const authStore = useAuthStore()
+authStore.checkAuth().then(isAuthenticated => {
+  if (!isAuthenticated && router.currentRoute.value.meta.requiresAuth) {
+    router.push('/login')
+  }
 })
 
 app.mount('#app')
