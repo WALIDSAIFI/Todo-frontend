@@ -76,6 +76,7 @@ router.beforeEach(async (to, from, next) => {
     return
   }
   
+  // For all other routes (like home page), just proceed
   next()
 })
 

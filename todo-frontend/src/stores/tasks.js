@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import axios from 'axios'
+import api from '@/services/api'
 
 export const useTasksStore = defineStore('tasks', () => {
   // State
@@ -8,17 +8,13 @@ export const useTasksStore = defineStore('tasks', () => {
   const loading = ref(false)
   const error = ref(null)
 
-  // Computed
-  const completedTasks = computed(() => {
-    return tasks.value?.filter(task => task.completed) || []
-  })
-  
-  const pendingTasks = computed(() => {
-    return tasks.value?.filter(task => !task.completed) || []
-  })
-  
-  const tasksCount = computed(() => {
-    return tasks.value?.length || 0
+  // Getters
+  const tasksCount = computed(() => tasks.value.length)
+  const completedTasksCount = computed(() => tasks.value.filter(task => task.is_completed).length)
+  const pendingTasksCount = computed(() => tasks.value.filter(task => !task.is_completed).length)
+  const completionRate = computed(() => {
+    if (tasksCount.value === 0) return 0
+    return Math.round((completedTasksCount.value / tasksCount.value) * 100)
   })
 
   // Actions
@@ -27,11 +23,12 @@ export const useTasksStore = defineStore('tasks', () => {
     error.value = null
     
     try {
-      const response = await axios.get('/api/tasks')
+      const response = await api.get('/tasks')
       tasks.value = response.data
+      return { success: true }
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to fetch tasks'
-      throw err
+      return { success: false, message: error.value }
     } finally {
       loading.value = false
     }
@@ -42,7 +39,13 @@ export const useTasksStore = defineStore('tasks', () => {
     error.value = null
     
     try {
-      const response = await axios.post('/api/tasks', taskData)
+      const response = await api.post('/tasks', {
+        title: taskData.title,
+        description: taskData.description,
+        due_date: taskData.due_date,
+        priority: taskData.priority || 'medium'
+      })
+      
       tasks.value.push(response.data)
       return { success: true, task: response.data }
     } catch (err) {
@@ -58,11 +61,19 @@ export const useTasksStore = defineStore('tasks', () => {
     error.value = null
     
     try {
-      const response = await axios.put(`/api/tasks/${id}`, taskData)
+      const response = await api.put(`/tasks/${id}`, {
+        title: taskData.title,
+        description: taskData.description,
+        due_date: taskData.due_date,
+        priority: taskData.priority,
+        is_completed: taskData.is_completed
+      })
+      
       const index = tasks.value.findIndex(task => task.id === id)
       if (index !== -1) {
         tasks.value[index] = response.data
       }
+      
       return { success: true, task: response.data }
     } catch (err) {
       error.value = err.response?.data?.message || 'Failed to update task'
@@ -77,7 +88,7 @@ export const useTasksStore = defineStore('tasks', () => {
     error.value = null
     
     try {
-      await axios.delete(`/api/tasks/${id}`)
+      await api.delete(`/tasks/${id}`)
       tasks.value = tasks.value.filter(task => task.id !== id)
       return { success: true }
     } catch (err) {
@@ -92,25 +103,41 @@ export const useTasksStore = defineStore('tasks', () => {
     const task = tasks.value.find(t => t.id === id)
     if (!task) return { success: false, message: 'Task not found' }
     
-    return await updateTask(id, { completed: !task.completed })
+    return await updateTask(id, {
+      ...task,
+      is_completed: !task.is_completed
+    })
   }
 
-  const getTaskById = (id) => {
-    return tasks.value.find(task => task.id === id)
+  const clearError = () => {
+    error.value = null
+  }
+
+  const resetState = () => {
+    tasks.value = []
+    loading.value = false
+    error.value = null
   }
 
   return {
+    // State
     tasks,
     loading,
     error,
-    completedTasks,
-    pendingTasks,
+    
+    // Getters
     tasksCount,
+    completedTasksCount,
+    pendingTasksCount,
+    completionRate,
+    
+    // Actions
     fetchTasks,
     createTask,
     updateTask,
     deleteTask,
     toggleTaskStatus,
-    getTaskById
+    clearError,
+    resetState
   }
 })

@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 
 // Create axios instance
 const api = axios.create({
-  baseURL: process.env.VUE_APP_API_URL || 'http://localhost:8000',
+  baseURL: process.env.VUE_APP_API_URL || 'http://localhost:8000/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

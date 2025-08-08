@@ -30,7 +30,7 @@
               <!-- Title -->
               <div>
                 <label for="title" class="block text-sm font-semibold text-gray-700 mb-2">
-                  Task Title
+                  Task Title <span class="text-red-500">*</span>
                 </label>
                 <input
                   id="title"
@@ -38,8 +38,10 @@
                   type="text"
                   required
                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.title }"
                   placeholder="What needs to be done?"
                 />
+                <p v-if="errors.title" class="mt-1 text-sm text-red-600">{{ errors.title }}</p>
               </div>
 
               <!-- Description -->
@@ -52,8 +54,10 @@
                   v-model="form.description"
                   rows="4"
                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none"
+                  :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.description }"
                   placeholder="Add more details about this task..."
                 ></textarea>
+                <p v-if="errors.description" class="mt-1 text-sm text-red-600">{{ errors.description }}</p>
               </div>
 
               <!-- Priority and Due Date Row -->
@@ -67,11 +71,13 @@
                     id="priority"
                     v-model="form.priority"
                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.priority }"
                   >
                     <option value="low">Low Priority</option>
                     <option value="medium">Medium Priority</option>
                     <option value="high">High Priority</option>
                   </select>
+                  <p v-if="errors.priority" class="mt-1 text-sm text-red-600">{{ errors.priority }}</p>
                 </div>
 
                 <!-- Due Date -->
@@ -84,7 +90,9 @@
                     v-model="form.due_date"
                     type="date"
                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.due_date }"
                   />
+                  <p v-if="errors.due_date" class="mt-1 text-sm text-red-600">{{ errors.due_date }}</p>
                 </div>
               </div>
 
@@ -158,6 +166,7 @@ export default {
     const toast = useToast()
     
     const loading = ref(false)
+    const errors = reactive({})
     
     const form = reactive({
       title: '',
@@ -172,6 +181,7 @@ export default {
     // Reset form when modal opens/closes
     watch(() => props.show, (show) => {
       if (show) {
+        clearErrors()
         if (props.task) {
           // Editing mode - populate form with task data
           Object.assign(form, {
@@ -194,13 +204,51 @@ export default {
       }
     })
 
+    const clearErrors = () => {
+      Object.keys(errors).forEach(key => {
+        errors[key] = ''
+      })
+    }
+
+    const validateForm = () => {
+      clearErrors()
+      let isValid = true
+
+      if (!form.title.trim()) {
+        errors.title = 'Title is required'
+        isValid = false
+      }
+
+      if (form.title.length > 255) {
+        errors.title = 'Title must be less than 255 characters'
+        isValid = false
+      }
+
+      if (form.description && form.description.length > 1000) {
+        errors.description = 'Description must be less than 1000 characters'
+        isValid = false
+      }
+
+      if (form.due_date) {
+        const selectedDate = new Date(form.due_date)
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        
+        if (selectedDate < today) {
+          errors.due_date = 'Due date cannot be in the past'
+          isValid = false
+        }
+      }
+
+      return isValid
+    }
+
     const closeModal = () => {
       emit('close')
     }
 
     const handleSubmit = async () => {
-      if (!form.title.trim()) {
-        toast.error('Title is required')
+      if (!validateForm()) {
         return
       }
 
@@ -216,10 +264,19 @@ export default {
 
         if (result.success) {
           emit('saved')
+          toast.success(isEditing.value ? 'Task updated successfully!' : 'Task created successfully!')
         } else {
-          toast.error(result.message)
+          // Handle validation errors from backend
+          if (result.message && typeof result.message === 'object') {
+            Object.keys(result.message).forEach(key => {
+              errors[key] = Array.isArray(result.message[key]) ? result.message[key][0] : result.message[key]
+            })
+          } else {
+            toast.error(result.message || 'An error occurred while saving the task')
+          }
         }
       } catch (error) {
+        console.error('Task save error:', error)
         toast.error('An error occurred while saving the task')
       } finally {
         loading.value = false
@@ -229,6 +286,7 @@ export default {
     return {
       form,
       loading,
+      errors,
       isEditing,
       closeModal,
       handleSubmit

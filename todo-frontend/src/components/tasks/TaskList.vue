@@ -125,7 +125,7 @@
                     {{ task.priority }}
                   </span>
                   
-                  <div class="flex items-center space-x-1 text-gray-500">
+                  <div v-if="task.due_date" class="flex items-center space-x-1 text-gray-500">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
@@ -168,11 +168,20 @@
       @close="showCreateModal = false"
       @saved="handleTaskSaved"
     />
+
+    <!-- Edit Task Modal -->
+    <TaskModal
+      v-if="showEditModal"
+      :show="showEditModal"
+      :task="editingTask"
+      @close="showEditModal = false"
+      @saved="handleTaskSaved"
+    />
   </div>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useTasksStore } from '@/stores/tasks'
 import { useToast } from 'vue-toastification'
 import TaskModal from './TaskModal.vue'
@@ -187,17 +196,20 @@ export default {
     const toast = useToast()
     
     const showCreateModal = ref(false)
+    const showEditModal = ref(false)
     const editingTask = ref(null)
 
     const { tasks, loading, error, tasksCount, fetchTasks, deleteTask, toggleTaskStatus } = tasksStore
 
     const closeModal = () => {
       showCreateModal.value = false
+      showEditModal.value = false
       editingTask.value = null
     }
 
     const editTask = (task) => {
       editingTask.value = { ...task }
+      showEditModal.value = true
     }
 
     const handleTaskSaved = () => {
@@ -230,6 +242,10 @@ export default {
       return new Date(dateString).toLocaleDateString()
     }
 
+    const completedTasksCount = computed(() => {
+      return tasks.value?.filter(task => task.completed)?.length || 0
+    })
+
     onMounted(() => {
       fetchTasks()
     })
@@ -239,7 +255,9 @@ export default {
       loading,
       error,
       tasksCount,
+      completedTasksCount,
       showCreateModal,
+      showEditModal,
       editingTask,
       closeModal,
       editTask,

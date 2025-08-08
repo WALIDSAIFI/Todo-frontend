@@ -1,173 +1,281 @@
-# Todo App - Frontend (Vue.js)
+# TaskFlow Pro - Vue.js Frontend
 
-Une application To-Do List moderne construite avec Vue.js 3, Pinia, et Tailwind CSS.
+Une application de gestion de tâches moderne construite avec Vue.js 3, Pinia, et Tailwind CSS, avec des notifications en temps réel via Pusher.
 
 ## 🚀 Fonctionnalités
 
-- ✅ **Authentification JWT** - Inscription et connexion sécurisées
-- ✅ **Gestion des tâches CRUD** - Créer, lire, mettre à jour, supprimer des tâches
-- ✅ **Notifications en temps réel** - Notifications instantanées via Pusher
-- ✅ **Interface moderne** - Design responsive avec Tailwind CSS
-- ✅ **Gestion d'état** - Pinia pour la gestion d'état
-- ✅ **Navigation** - Vue Router pour la navigation
-- ✅ **Validation** - Validation des formulaires
-- ✅ **Toast notifications** - Notifications utilisateur
+### 🔐 Authentification
+- **Inscription** : Création de compte avec nom complet, email, téléphone et mot de passe
+- **Connexion** : Authentification sécurisée avec JWT
+- **Protection des routes** : Middleware d'authentification pour les pages protégées
 
-## 🛠️ Technologies utilisées
+### 📋 Gestion des Tâches (CRUD)
+- **Création** : Ajouter de nouvelles tâches avec titre, description, priorité et date d'échéance
+- **Lecture** : Afficher la liste des tâches avec filtres et statistiques
+- **Modification** : Éditer les tâches existantes
+- **Suppression** : Supprimer des tâches avec confirmation
+- **Statut** : Marquer les tâches comme complétées/incomplètes
 
-- **Vue.js 3** - Framework JavaScript progressif
-- **Pinia** - Gestion d'état
-- **Vue Router** - Navigation
-- **Tailwind CSS** - Framework CSS utilitaire
-- **Axios** - Client HTTP
-- **Pusher** - WebSockets pour les notifications en temps réel
-- **Laravel Echo** - Client WebSocket pour Laravel
-- **Vue Toastification** - Notifications toast
-- **Heroicons** - Icônes SVG
+### 🔔 Notifications en Temps Réel
+- **Notifications push** : Recevoir des notifications instantanées lors de la création/modification/suppression de tâches
+- **Page dédiée** : Interface dédiée pour consulter l'historique des notifications
+- **Badge de notification** : Indicateur visuel du nombre de notifications non lues
+- **Marquage comme lu** : Possibilité de marquer les notifications comme lues
+
+### 🎨 Interface Utilisateur
+- **Design moderne** : Interface utilisateur élégante avec Tailwind CSS
+- **Responsive** : Compatible mobile, tablette et desktop
+- **Animations** : Transitions fluides et animations CSS
+- **Thème** : Design cohérent avec dégradés et couleurs modernes
+
+## 🛠️ Technologies Utilisées
+
+- **Vue.js 3** : Framework JavaScript progressif
+- **Pinia** : Gestion d'état moderne pour Vue
+- **Vue Router** : Routage côté client
+- **Tailwind CSS** : Framework CSS utilitaire
+- **Axios** : Client HTTP pour les appels API
+- **Laravel Echo** : Client WebSocket pour les notifications en temps réel
+- **Pusher** : Service de WebSockets pour les notifications
+- **Vue Toastification** : Notifications toast élégantes
 
 ## 📋 Prérequis
 
-- Node.js (version 14 ou supérieure)
-- npm ou yarn
-- Backend Laravel configuré et en cours d'exécution
+- **Node.js** (version 16 ou supérieure)
+- **npm** ou **yarn**
+- **Backend Laravel** en cours d'exécution sur `http://localhost:8000`
 
 ## 🚀 Installation
 
-1. **Cloner le repository**
-   ```bash
-   git clone <repository-url>
-   cd todo-frontend
-   ```
+### 1. Cloner le projet
+```bash
+git clone <repository-url>
+cd todo-frontend
+```
 
-2. **Installer les dépendances**
-   ```bash
-   npm install
-   ```
+### 2. Installer les dépendances
+```bash
+npm install
+# ou
+yarn install
+```
 
-3. **Configurer les variables d'environnement**
-   ```bash
-   cp env.example .env
-   ```
-   
-   Éditer le fichier `.env` :
-   ```env
-   VUE_APP_API_URL=http://localhost:8000
-   VUE_APP_PUSHER_APP_KEY=your-pusher-key
-   VUE_APP_PUSHER_APP_CLUSTER=mt1
-   ```
+### 3. Configuration de l'environnement
+Copiez le fichier d'environnement d'exemple :
+```bash
+cp env.example .env
+```
 
-4. **Démarrer le serveur de développement**
-   ```bash
-   npm run serve
-   ```
+Modifiez le fichier `.env` avec vos configurations :
+```env
+# Vue App Configuration
+VUE_APP_API_URL=http://localhost:8000
+VUE_APP_PUSHER_APP_KEY=your-pusher-key
+VUE_APP_PUSHER_APP_CLUSTER=mt1
+VUE_APP_PUSHER_APP_SECRET=your-pusher-secret
 
-5. **Ouvrir l'application**
-   - L'application sera disponible à l'adresse : `http://localhost:8080`
+# Development Configuration
+NODE_ENV=development
+VUE_APP_ENV=development
+```
 
-## 📁 Structure du projet
+### 4. Configuration Pusher (optionnel)
+Pour les notifications en temps réel, configurez Pusher :
+1. Créez un compte sur [Pusher](https://pusher.com/)
+2. Créez une nouvelle application
+3. Copiez les clés dans votre fichier `.env`
+
+### 5. Démarrer l'application
+```bash
+npm run serve
+# ou
+yarn serve
+```
+
+L'application sera accessible sur `http://localhost:8080`
+
+## 📁 Structure du Projet
 
 ```
 src/
-├── assets/              # Assets statiques
+├── assets/              # Ressources statiques
 ├── components/          # Composants Vue
 │   ├── auth/           # Composants d'authentification
-│   ├── tasks/          # Composants de gestion des tâches
-│   └── notifications/  # Composants de notifications
+│   ├── notifications/  # Composants de notifications
+│   └── tasks/          # Composants de gestion des tâches
 ├── pages/              # Pages de l'application
-├── router/             # Configuration du routeur
+├── router/             # Configuration du routage
 ├── services/           # Services (API, Echo)
 ├── stores/             # Stores Pinia
 └── main.js             # Point d'entrée de l'application
 ```
 
-## 🔧 Configuration
+## 🔧 Configuration Backend
 
-### Variables d'environnement
+Assurez-vous que votre backend Laravel est configuré avec :
 
-- `VUE_APP_API_URL` : URL de l'API Laravel
-- `VUE_APP_PUSHER_APP_KEY` : Clé Pusher pour les WebSockets
-- `VUE_APP_PUSHER_APP_CLUSTER` : Cluster Pusher
+### 1. Routes API
+```php
+// routes/api.php
+Route::prefix('auth')->group(function () {
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class, 'login']);
+    Route::get('me', [AuthController::class, 'me'])->middleware('auth:sanctum');
+});
 
-### Configuration Pusher
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('tasks', TaskController::class);
+    Route::apiResource('notifications', NotificationController::class);
+});
+```
 
-Pour les notifications en temps réel, vous devez configurer Pusher :
+### 2. Configuration CORS
+```php
+// config/cors.php
+return [
+    'paths' => ['api/*'],
+    'allowed_methods' => ['*'],
+    'allowed_origins' => ['http://localhost:8080'],
+    'allowed_origins_patterns' => [],
+    'allowed_headers' => ['*'],
+    'exposed_headers' => [],
+    'max_age' => 0,
+    'supports_credentials' => true,
+];
+```
 
-1. Créer un compte sur [Pusher](https://pusher.com)
-2. Créer une nouvelle application
-3. Copier les clés dans le fichier `.env`
+### 3. Configuration Broadcasting (pour les notifications)
+```php
+// config/broadcasting.php
+'pusher' => [
+    'driver' => 'pusher',
+    'key' => env('PUSHER_APP_KEY'),
+    'secret' => env('PUSHER_APP_SECRET'),
+    'app_id' => env('PUSHER_APP_ID'),
+    'options' => [
+        'cluster' => env('PUSHER_APP_CLUSTER'),
+        'useTLS' => true
+    ],
+],
+```
 
 ## 🎯 Utilisation
 
-### Authentification
+### 1. Création de compte
+- Accédez à `/register`
+- Remplissez le formulaire avec vos informations
+- Cliquez sur "Create Account"
 
-1. **Inscription** : Accédez à `/register` pour créer un compte
-2. **Connexion** : Accédez à `/login` pour vous connecter
+### 2. Connexion
+- Accédez à `/login`
+- Entrez vos identifiants
+- Cliquez sur "Sign In"
 
-### Gestion des tâches
+### 3. Gestion des tâches
+- **Créer une tâche** : Cliquez sur "Add Task" dans le dashboard
+- **Modifier une tâche** : Cliquez sur l'icône d'édition
+- **Supprimer une tâche** : Cliquez sur l'icône de suppression
+- **Marquer comme complétée** : Cliquez sur le cercle à côté du titre
 
-1. **Créer une tâche** : Cliquez sur "Add Task" dans le tableau de bord
-2. **Modifier une tâche** : Cliquez sur l'icône d'édition
-3. **Supprimer une tâche** : Cliquez sur l'icône de suppression
-4. **Marquer comme terminée** : Cliquez sur la case à cocher
+### 4. Notifications
+- **Voir les notifications** : Cliquez sur l'icône de cloche dans la navigation
+- **Marquer comme lu** : Cliquez sur l'icône de validation
+- **Supprimer** : Cliquez sur l'icône de suppression
 
-### Notifications
+## 🔍 Développement
 
-- Les notifications apparaissent automatiquement lors de la création de tâches
-- Accédez à `/notifications` pour voir toutes les notifications
-- Marquez les notifications comme lues ou supprimez-les
-
-## 🧪 Tests
-
+### Scripts disponibles
 ```bash
-# Lancer les tests unitaires
-npm run test:unit
+# Démarrer le serveur de développement
+npm run serve
 
-# Lancer les tests e2e
-npm run test:e2e
-```
-
-## 📦 Build pour la production
-
-```bash
 # Build pour la production
 npm run build
 
-# Prévisualiser le build
-npm run serve -- --mode production
+# Linter et correction automatique
+npm run lint
+
+# Tests unitaires
+npm run test:unit
 ```
 
-## 🔍 Débogage
+### Ajout de nouvelles fonctionnalités
+1. **Nouveau composant** : Créez dans `src/components/`
+2. **Nouvelle page** : Créez dans `src/pages/` et ajoutez la route
+3. **Nouveau store** : Créez dans `src/stores/` avec Pinia
+4. **Nouvelle API** : Ajoutez dans `src/services/api.js`
+
+## 🐛 Dépannage
 
 ### Problèmes courants
 
-1. **Erreur de connexion API**
-   - Vérifiez que le backend Laravel est en cours d'exécution
-   - Vérifiez l'URL dans `VUE_APP_API_URL`
+#### 1. Erreur de connexion API
+```
+Error: Network Error
+```
+**Solution** : Vérifiez que le backend Laravel est en cours d'exécution sur `http://localhost:8000`
 
-2. **Notifications ne fonctionnent pas**
-   - Vérifiez la configuration Pusher
-   - Vérifiez que Laravel Echo est configuré côté backend
+#### 2. Erreur CORS
+```
+Access to XMLHttpRequest has been blocked by CORS policy
+```
+**Solution** : Vérifiez la configuration CORS dans le backend Laravel
 
-3. **Erreurs de CORS**
-   - Configurez CORS dans le backend Laravel
-   - Vérifiez les en-têtes de requête
+#### 3. Notifications en temps réel ne fonctionnent pas
+**Solution** : 
+- Vérifiez la configuration Pusher dans `.env`
+- Assurez-vous que le broadcasting est configuré dans Laravel
+- Vérifiez les logs de la console pour les erreurs Echo
+
+#### 4. Erreur d'authentification
+```
+401 Unauthorized
+```
+**Solution** : 
+- Vérifiez que le token JWT est valide
+- Assurez-vous que l'utilisateur est connecté
+- Vérifiez la configuration Sanctum dans Laravel
+
+## 📝 API Endpoints
+
+### Authentification
+- `POST /api/auth/register` - Inscription
+- `POST /api/auth/login` - Connexion
+- `GET /api/auth/me` - Informations utilisateur
+
+### Tâches
+- `GET /api/tasks` - Liste des tâches
+- `POST /api/tasks` - Créer une tâche
+- `GET /api/tasks/{id}` - Détails d'une tâche
+- `PUT /api/tasks/{id}` - Modifier une tâche
+- `DELETE /api/tasks/{id}` - Supprimer une tâche
+
+### Notifications
+- `GET /api/notifications` - Liste des notifications
+- `PUT /api/notifications/{id}/read` - Marquer comme lu
+- `PUT /api/notifications/mark-all-read` - Tout marquer comme lu
+- `DELETE /api/notifications/{id}` - Supprimer une notification
+- `DELETE /api/notifications` - Supprimer toutes les notifications
 
 ## 🤝 Contribution
 
 1. Fork le projet
-2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
-3. Commit les changements (`git commit -m 'Add some AmazingFeature'`)
+2. Créez une branche pour votre fonctionnalité (`git checkout -b feature/AmazingFeature`)
+3. Committez vos changements (`git commit -m 'Add some AmazingFeature'`)
 4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
+5. Ouvrez une Pull Request
 
 ## 📄 Licence
 
 Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
-## 📞 Support
+## 👥 Auteurs
 
-Pour toute question ou problème, veuillez ouvrir une issue sur GitHub.
+- **Votre Nom** - *Développement initial* - [VotreGitHub](https://github.com/votre-username)
 
----
+## 🙏 Remerciements
 
-**Note** : Ce projet fait partie d'une application Full Stack avec Laravel (backend) et Vue.js (frontend). Assurez-vous que le backend est correctement configuré et en cours d'exécution.
+- [Vue.js](https://vuejs.org/) - Framework JavaScript progressif
+- [Tailwind CSS](https://tailwindcss.com/) - Framework CSS utilitaire
+- [Pusher](https://pusher.com/) - Service de WebSockets
+- [Laravel](https://laravel.com/) - Framework PHP pour le backend
